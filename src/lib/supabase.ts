@@ -6,8 +6,4 @@ const rawKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 const supabaseUrl = (rawUrl && rawUrl !== 'undefined') ? rawUrl.trim() : 'https://placeholder.supabase.co'
 const supabaseAnonKey = (rawKey && rawKey !== 'undefined') ? rawKey.trim() : 'placeholder'
 
-if (supabaseUrl === 'https://placeholder.supabase.co') {
-  console.warn('Supabase: Missing URL! process.env.NEXT_PUBLIC_SUPABASE_URL is:', rawUrl)
-}
-
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)

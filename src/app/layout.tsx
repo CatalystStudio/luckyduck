@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "TelcoMotion AHR 2026",
-  description: "Win Daily Prizes at AHR 2026",
+  title: "LuckyDuck - Prize Drawing Platform",
+  description: "Run prize drawings at tradeshows, events, and storefronts.",
 };
 
 export default function RootLayout({

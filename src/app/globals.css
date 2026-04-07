@@ -3,22 +3,16 @@
 :root {
   --background: #f8fafc;
   --foreground: #0f172a;
-  --telco-blue: #005596;
-  --motion-orange: #E47225;
-  --light-blue: #00ADEE;
-  
-  --primary: var(--telco-blue);
-  --secondary: var(--motion-orange);
-  --accent: var(--light-blue);
+
+  --primary: #1e3a5f;
+  --secondary: #e8853b;
+  --accent: #3b9ece;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-telco-blue: var(--telco-blue);
-  --color-motion-orange: var(--motion-orange);
-  --color-light-blue: var(--light-blue);
-  
+
   --color-primary: var(--primary);
   --color-secondary: var(--secondary);
   --color-accent: var(--accent);
@@ -38,7 +32,7 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6 {
-  color: var(--telco-blue);
+  color: var(--primary);
   font-weight: 700;
 }
 
@@ -47,6 +41,6 @@ button {
 }
 
 input:focus {
-  outline: 2px solid var(--light-blue);
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
