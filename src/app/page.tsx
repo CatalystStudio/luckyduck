@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {
-  Bird,
   ArrowRight,
   Paintbrush,
   WifiOff,
@@ -17,6 +16,7 @@ import {
 } from 'lucide-react';
 import MockPhone from '@/components/MockPhone';
 import MockDashboard from '@/components/MockDashboard';
+import LuckyDuckLogo from '@/components/LuckyDuckLogo';
 
 /* ─── animation helpers ─── */
 const fadeUp = {
@@ -65,10 +65,7 @@ export default function LandingPage() {
       {/* ── Nav ── */}
       <nav className="absolute top-0 left-0 right-0 z-10">
         <div className="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-navy">
-            <Bird size={24} />
-            <span className="text-lg font-black tracking-tight">LuckyDuck</span>
-          </div>
+          <LuckyDuckLogo className="h-8 w-auto" />
           <div className="flex items-center gap-4">
             <a href="#login" className="text-sm text-navy-muted hover:text-navy transition-colors">
               Login
@@ -143,10 +140,10 @@ export default function LandingPage() {
             variants={stagger}
             className="text-center mb-14"
           >
-            <motion.h2 variants={fadeUp} className="text-3xl md:text-4xl font-black text-slate-900 mb-4">
+            <motion.h2 variants={fadeUp} className="text-3xl md:text-4xl font-black text-navy mb-4">
               Still Running Giveaways the Old Way?
             </motion.h2>
-            <motion.p variants={fadeUp} className="text-slate-500 max-w-2xl mx-auto">
+            <motion.p variants={fadeUp} className="text-navy-muted max-w-2xl mx-auto">
               Paper fishbowls, clipboards, and Google Forms weren&apos;t built for the chaos of a live
               event. You deserve better.
             </motion.p>
@@ -196,16 +193,16 @@ export default function LandingPage() {
               <motion.div
                 key={i}
                 variants={fadeUp}
-                className="bg-red-50/60 border border-red-100 rounded-2xl p-6 text-center"
+                className="bg-coral/5 border border-coral/15 rounded-2xl p-6 text-center"
               >
-                <div className="w-14 h-14 mx-auto mb-4 bg-red-100 text-red-500 rounded-xl flex items-center justify-center">
+                <div className="w-14 h-14 mx-auto mb-4 bg-coral/10 text-coral rounded-2xl flex items-center justify-center">
                   {item.icon}
                 </div>
-                <h3 className="text-sm font-bold text-slate-800 mb-3">{item.label}</h3>
-                <ul className="space-y-1.5 text-sm text-slate-600">
+                <h3 className="text-sm font-bold text-navy mb-3">{item.label}</h3>
+                <ul className="space-y-1.5 text-sm text-navy-muted">
                   {item.problems.map((p, j) => (
                     <li key={j} className="flex items-start gap-2 text-left">
-                      <X size={14} className="text-red-400 mt-0.5 shrink-0" />
+                      <X size={14} className="text-coral mt-0.5 shrink-0" />
                       {p}
                     </li>
                   ))}
@@ -470,10 +467,7 @@ export default function LandingPage() {
       <footer className="border-t border-slate-100 py-8">
         <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-1.5 text-slate-500">
-              <Bird size={16} />
-              <span className="text-sm font-bold">LuckyDuck</span>
-            </div>
+            <LuckyDuckLogo className="h-5 w-auto" />
             <span className="text-xs text-slate-400">
               &copy; 2026 LuckyDuck Marketing, a division of{' '}
               <a
