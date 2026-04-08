@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import {
   Trophy, Users, RefreshCw, Check, X, Shield, Download,
-  Eye, UserCheck, QrCode as QrCodeIcon, BarChart3,
+  Eye, UserCheck, QrCode as QrCodeIcon, BarChart3, Copy, CreditCard,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import QRCode from 'qrcode';
@@ -25,7 +25,13 @@ export default function AdminPage() {
   const [isDrawing, setIsDrawing] = useState(false);
   const [countdown, setCountdown] = useState<number | null>(null);
   const [selectedWinner, setSelectedWinner] = useState<Entrant | null>(null);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'drawing'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'drawing' | 'billing'>('dashboard');
+
+  // Clone
+  const [cloning, setCloning] = useState(false);
+
+  // Billing
+  const [upgrading, setUpgrading] = useState(false);
 
   // QR
   const qrCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -234,6 +240,56 @@ export default function AdminPage() {
     URL.revokeObjectURL(url);
   };
 
+  const duplicateDrawing = async () => {
+    if (cloning) return;
+    setCloning(true);
+    try {
+      const res = await fetch('/api/admin/drawings/clone', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tenantSlug: params.tenantSlug,
+          drawingSlug: params.drawingSlug,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.error || 'Failed to duplicate drawing.');
+        return;
+      }
+      if (confirm(`Drawing duplicated as "${data.slug}". Go to the new drawing?`)) {
+        window.location.href = `/${params.tenantSlug}/${data.slug}/admin`;
+      }
+    } catch {
+      alert('Network error. Please try again.');
+    } finally {
+      setCloning(false);
+    }
+  };
+
+  const handleUpgrade = async (plan: 'pro' | 'event') => {
+    setUpgrading(true);
+    try {
+      const res = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tenantSlug: params.tenantSlug, plan }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.error || 'Failed to start checkout.');
+        return;
+      }
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    } catch {
+      alert('Network error. Please try again.');
+    } finally {
+      setUpgrading(false);
+    }
+  };
+
   // ── Loading state ──────────────────────────────────────────
   if (isChecking) {
     return (
@@ -298,6 +354,14 @@ export default function AdminPage() {
           </div>
           <div className="flex items-center gap-3">
             <button
+              onClick={duplicateDrawing}
+              disabled={cloning}
+              className="px-3 py-2 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 flex items-center gap-2 text-sm font-medium text-slate-600 disabled:opacity-50"
+              title="Duplicate this drawing"
+            >
+              <Copy size={16} /> {cloning ? 'Duplicating...' : 'Duplicate'}
+            </button>
+            <button
               onClick={exportCSV}
               className="px-3 py-2 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 flex items-center gap-2 text-sm font-medium text-slate-600"
             >
@@ -334,6 +398,16 @@ export default function AdminPage() {
             }`}
           >
             <Trophy size={16} /> Drawing
+          </button>
+          <button
+            onClick={() => setActiveTab('billing')}
+            className={`px-4 py-2 rounded-md text-sm font-medium flex items-center gap-2 transition-colors ${
+              activeTab === 'billing'
+                ? 'bg-white text-slate-900 shadow-sm'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            <CreditCard size={16} /> Billing
           </button>
         </div>
 
@@ -522,6 +596,79 @@ export default function AdminPage() {
                 </motion.div>
               )}
             </AnimatePresence>
+          </div>
+        )}
+
+        {activeTab === 'billing' && (
+          <div className="space-y-6">
+            <div className="bg-white rounded-xl border border-slate-200 p-6">
+              <h3 className="text-lg font-bold text-slate-900 mb-1">Current Plan</h3>
+              <p className="text-sm text-slate-500 mb-4">
+                You are on the <span className="font-semibold text-primary capitalize">{tenant.tier || 'beta'}</span> plan.
+                {tenant.tier === 'beta' || tenant.tier === 'free'
+                  ? ' Upgrade to unlock more drawings and higher entrant limits.'
+                  : ''}
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-6">
+              {/* Pro Plan */}
+              <div className="bg-white rounded-xl border border-slate-200 p-6 flex flex-col">
+                <div className="mb-4">
+                  <h4 className="text-xl font-bold text-slate-900">Pro</h4>
+                  <div className="flex items-baseline gap-1 mt-1">
+                    <span className="text-3xl font-black text-slate-900">$49</span>
+                    <span className="text-sm text-slate-500">/month</span>
+                  </div>
+                </div>
+                <ul className="space-y-2 text-sm text-slate-600 mb-6 flex-1">
+                  <li className="flex items-center gap-2"><Check size={14} className="text-green-500" /> Up to 10 drawings</li>
+                  <li className="flex items-center gap-2"><Check size={14} className="text-green-500" /> 500 entrants per drawing</li>
+                  <li className="flex items-center gap-2"><Check size={14} className="text-green-500" /> Full branding &amp; customization</li>
+                  <li className="flex items-center gap-2"><Check size={14} className="text-green-500" /> CSV export &amp; winner selection</li>
+                  <li className="flex items-center gap-2"><Check size={14} className="text-green-500" /> Priority support</li>
+                </ul>
+                <button
+                  onClick={() => handleUpgrade('pro')}
+                  disabled={upgrading || tenant.tier === 'pro'}
+                  className="w-full py-3 bg-primary text-white font-bold rounded-lg disabled:opacity-50 hover:brightness-110 transition-all"
+                >
+                  {tenant.tier === 'pro' ? 'Current Plan' : upgrading ? 'Redirecting...' : 'Upgrade to Pro'}
+                </button>
+              </div>
+
+              {/* Event Plan */}
+              <div className="bg-white rounded-xl border-2 border-secondary p-6 flex flex-col relative">
+                <div className="absolute -top-3 right-4 bg-secondary text-white text-xs font-bold px-3 py-1 rounded-full">
+                  BEST VALUE
+                </div>
+                <div className="mb-4">
+                  <h4 className="text-xl font-bold text-slate-900">Event</h4>
+                  <div className="flex items-baseline gap-1 mt-1">
+                    <span className="text-3xl font-black text-slate-900">$99</span>
+                    <span className="text-sm text-slate-500">/month</span>
+                  </div>
+                </div>
+                <ul className="space-y-2 text-sm text-slate-600 mb-6 flex-1">
+                  <li className="flex items-center gap-2"><Check size={14} className="text-green-500" /> Up to 50 drawings</li>
+                  <li className="flex items-center gap-2"><Check size={14} className="text-green-500" /> 5,000 entrants per drawing</li>
+                  <li className="flex items-center gap-2"><Check size={14} className="text-green-500" /> Full branding &amp; customization</li>
+                  <li className="flex items-center gap-2"><Check size={14} className="text-green-500" /> CSV export &amp; winner selection</li>
+                  <li className="flex items-center gap-2"><Check size={14} className="text-green-500" /> Dedicated account manager</li>
+                </ul>
+                <button
+                  onClick={() => handleUpgrade('event')}
+                  disabled={upgrading || tenant.tier === 'event'}
+                  className="w-full py-3 bg-secondary text-white font-bold rounded-lg disabled:opacity-50 hover:brightness-110 transition-all shadow-lg shadow-secondary/25"
+                >
+                  {tenant.tier === 'event' ? 'Current Plan' : upgrading ? 'Redirecting...' : 'Upgrade to Event'}
+                </button>
+              </div>
+            </div>
+
+            <p className="text-xs text-slate-400 text-center">
+              Payments are processed securely via Stripe. Cancel anytime from your billing portal.
+            </p>
           </div>
         )}
 

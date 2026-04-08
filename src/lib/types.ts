@@ -23,6 +23,9 @@ export interface Tenant {
   contact_company: string | null;
   contact_industry: string | null;
   contact_needs: string | null;
+  stripe_customer_id: string | null;
+  stripe_subscription_id: string | null;
+  plan_tier: string;
 }
 
 export interface Drawing {

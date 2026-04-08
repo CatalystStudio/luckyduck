@@ -6,8 +6,6 @@ import { motion } from 'framer-motion';
 import {
   Bird,
   ArrowRight,
-  Check,
-  Loader2,
   Paintbrush,
   WifiOff,
   FileDown,
@@ -53,13 +51,6 @@ export default function LandingPage() {
   const router = useRouter();
   const [loginSlug, setLoginSlug] = useState('');
 
-  // Beta signup
-  const [beta, setBeta] = useState({ name: '', email: '', company: '' });
-  const [betaLoading, setBetaLoading] = useState(false);
-  const [betaSuccess, setBetaSuccess] = useState(false);
-  const [betaError, setBetaError] = useState('');
-  const [createdSlug, setCreatedSlug] = useState('');
-
   // FAQ accordion
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
@@ -69,89 +60,65 @@ export default function LandingPage() {
     if (cleaned) router.push(`/${cleaned}`);
   };
 
-  const handleBetaSignup = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setBetaLoading(true);
-    setBetaError('');
-    try {
-      const res = await fetch('/api/beta-signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: beta.name, email: beta.email, company: beta.company }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setBetaError(data.error || 'Something went wrong. Please try again.');
-        return;
-      }
-      setCreatedSlug(data.slug);
-      setBetaSuccess(true);
-    } catch {
-      setBetaError('Something went wrong. Please try again.');
-    } finally {
-      setBetaLoading(false);
-    }
-  };
-
   return (
-    <main className="min-h-screen bg-slate-50">
+    <main className="min-h-screen bg-cream">
       {/* ── Nav ── */}
       <nav className="absolute top-0 left-0 right-0 z-10">
         <div className="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-white">
+          <div className="flex items-center gap-2 text-navy">
             <Bird size={24} />
             <span className="text-lg font-black tracking-tight">LuckyDuck</span>
           </div>
           <div className="flex items-center gap-4">
-            <a href="#login" className="text-sm text-white/70 hover:text-white transition-colors">
+            <a href="#login" className="text-sm text-navy-muted hover:text-navy transition-colors">
               Login
             </a>
             <a
-              href="#beta"
-              className="text-sm bg-white/10 backdrop-blur-sm text-white px-4 py-1.5 rounded-full hover:bg-white/20 transition-colors"
+              href="/apply"
+              className="text-sm bg-sage/10 backdrop-blur-sm text-sage px-4 py-1.5 rounded-full hover:bg-sage/20 transition-colors font-semibold"
             >
-              Claim Beta Spot
+              Apply for Beta
             </a>
           </div>
         </div>
       </nav>
 
       {/* ── Hero ── */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/20 via-transparent to-transparent" />
+      <section className="relative overflow-hidden bg-gradient-to-br from-cream via-cream-dark to-sage-light">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-sage/10 via-transparent to-transparent" />
         <div className="relative max-w-6xl mx-auto px-6 pt-28 pb-24 md:pt-36 md:pb-32">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <motion.div initial="hidden" animate="visible" variants={stagger}>
               <motion.div
                 variants={fadeUp}
-                className="inline-flex items-center gap-2 bg-secondary/20 backdrop-blur-sm text-secondary text-sm font-semibold px-4 py-1.5 rounded-full mb-6"
+                className="inline-flex items-center gap-2 bg-coral/15 text-coral text-sm font-semibold px-4 py-1.5 rounded-full mb-6"
               >
                 <Sparkles size={14} />
                 Founding Beta — Limited Spots
               </motion.div>
               <motion.h1
                 variants={fadeUp}
-                className="text-4xl md:text-5xl font-black text-white leading-tight mb-6"
+                className="text-4xl md:text-5xl font-black text-navy leading-tight mb-6"
               >
                 Ditch the Fishbowl.
                 <br />
-                <span className="text-accent">Capture Event Leads</span> with Flawless Digital
+                <span className="text-sage">Capture Event Leads</span> with Flawless Digital
                 Giveaways.
               </motion.h1>
-              <motion.p variants={fadeUp} className="text-lg text-slate-300 mb-8 leading-relaxed max-w-xl">
+              <motion.p variants={fadeUp} className="text-lg text-navy-muted mb-8 leading-relaxed max-w-xl">
                 The QR-to-capture platform for tradeshows, field marketing, and retail. No
                 clipboards, no messy handwriting — just exportable leads.
               </motion.p>
               <motion.div variants={fadeUp} className="flex flex-col sm:flex-row gap-3">
                 <a
-                  href="#beta"
-                  className="px-7 py-3.5 bg-secondary text-white font-bold rounded-xl text-center hover:brightness-110 transition-all shadow-lg shadow-secondary/25"
+                  href="/apply"
+                  className="px-7 py-3.5 bg-coral text-white font-bold rounded-2xl text-center hover:brightness-110 transition-all shadow-lg shadow-coral/20"
                 >
-                  Claim a Beta Spot — Limited Availability
+                  Apply for Beta Access
                 </a>
                 <a
                   href="#how"
-                  className="px-6 py-3.5 border border-white/20 text-white font-medium rounded-xl text-center hover:bg-white/5 transition-colors"
+                  className="px-6 py-3.5 border border-navy/15 text-navy font-medium rounded-2xl text-center hover:bg-sage-light transition-colors"
                 >
                   See How It Works
                 </a>
@@ -167,7 +134,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── The Enemy / Problem Section ── */}
-      <section className="bg-white border-b border-slate-100">
+      <section className="bg-white/70 border-b border-sage-light/50">
         <div className="max-w-6xl mx-auto px-6 py-20">
           <motion.div
             initial="hidden"
@@ -427,131 +394,40 @@ export default function LandingPage() {
         </motion.div>
       </section>
 
-      {/* ── Beta Claim Section ── */}
+      {/* ── Beta CTA Section ── */}
       <section id="beta" className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-secondary/10 via-transparent to-transparent" />
         <div className="relative max-w-6xl mx-auto px-6 py-24">
-          <div className="max-w-lg mx-auto">
-            {betaSuccess ? (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="bg-white rounded-2xl shadow-2xl p-8 text-center"
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={stagger}
+            className="max-w-lg mx-auto text-center"
+          >
+            <motion.div variants={fadeUp} className="inline-flex items-center gap-2 bg-secondary/20 backdrop-blur-sm text-secondary text-sm font-semibold px-4 py-1.5 rounded-full mb-6">
+              <Sparkles size={14} />
+              Founding Beta — Limited Spots
+            </motion.div>
+            <motion.h2 variants={fadeUp} className="text-3xl md:text-4xl font-black text-white mb-4">
+              Ready to Ditch the Fishbowl?
+            </motion.h2>
+            <motion.p variants={fadeUp} className="text-lg text-slate-300 mb-8 leading-relaxed">
+              Apply for free beta access. We&apos;ll review your application and get you set up
+              with a branded giveaway workspace within 24-48 hours.
+            </motion.p>
+            <motion.div variants={fadeUp} className="flex flex-col sm:flex-row gap-3 justify-center">
+              <a
+                href="/apply"
+                className="px-8 py-4 bg-secondary text-white font-bold rounded-xl text-center hover:brightness-110 transition-all shadow-lg shadow-secondary/25 text-lg flex items-center justify-center gap-2"
               >
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-green-50 text-green-500 rounded-full mb-4">
-                  <Check size={32} />
-                </div>
-                <h2 className="text-2xl font-bold text-slate-900 mb-2">You&apos;re in!</h2>
-                <p className="text-slate-600 mb-6">
-                  Your beta workspace is live. Your slug is{' '}
-                  <strong className="text-primary">/{createdSlug}</strong>.
-                </p>
-                <div className="bg-slate-50 border rounded-xl p-4 mb-6 text-left text-sm">
-                  <h3 className="font-bold text-slate-700 mb-2">Founding Beta Includes:</h3>
-                  <ul className="space-y-1 text-slate-600">
-                    <li className="flex items-center gap-2"><Check size={14} className="text-green-500" /> 1 live drawing event</li>
-                    <li className="flex items-center gap-2"><Check size={14} className="text-green-500" /> Up to 250 entrants</li>
-                    <li className="flex items-center gap-2"><Check size={14} className="text-green-500" /> Full branding customization</li>
-                    <li className="flex items-center gap-2"><Check size={14} className="text-green-500" /> CSV export &amp; winner selection</li>
-                  </ul>
-                  <p className="text-xs text-slate-400 mt-3">
-                    Need more? Contact{' '}
-                    <a href="mailto:beta@luckyduck.marketing" className="text-primary hover:underline">
-                      beta@luckyduck.marketing
-                    </a>
-                  </p>
-                </div>
-                <button
-                  onClick={() => router.push(`/${createdSlug}`)}
-                  className="w-full py-3 bg-primary text-white font-bold rounded-lg flex items-center justify-center gap-2 hover:brightness-110 transition-all"
-                >
-                  Go to Dashboard <ArrowRight size={18} />
-                </button>
-              </motion.div>
-            ) : (
-              <motion.div
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-                variants={stagger}
-                className="bg-white rounded-2xl shadow-2xl p-8"
-              >
-                <motion.div variants={fadeUp} className="text-center mb-6">
-                  <div className="inline-flex items-center gap-2 bg-secondary/10 text-secondary text-xs font-bold px-3 py-1 rounded-full mb-3">
-                    FOUNDING BETA — LIMITED SPOTS
-                  </div>
-                  <h2 className="text-2xl font-black text-slate-900 mb-2">
-                    Claim Your Beta Spot
-                  </h2>
-                  <p className="text-sm text-slate-500 max-w-sm mx-auto">
-                    Free access to 1 live event drawing, 250 entrants, full branding, and CSV export.
-                    Early beta spots are limited while we onboard initial event partners.
-                  </p>
-                </motion.div>
-
-                <motion.form variants={fadeUp} onSubmit={handleBetaSignup} className="space-y-4">
-                  <div>
-                    <label className="block text-xs font-medium text-slate-600 mb-1">Your Name</label>
-                    <input
-                      required
-                      type="text"
-                      placeholder="Jane Smith"
-                      className="w-full px-3 py-2.5 border rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none"
-                      value={beta.name}
-                      onChange={(e) => setBeta({ ...beta, name: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-slate-600 mb-1">Work Email</label>
-                    <input
-                      required
-                      type="email"
-                      placeholder="jane@company.com"
-                      className="w-full px-3 py-2.5 border rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none"
-                      value={beta.email}
-                      onChange={(e) => setBeta({ ...beta, email: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-slate-600 mb-1">Company</label>
-                    <input
-                      required
-                      type="text"
-                      placeholder="Acme Corp"
-                      className="w-full px-3 py-2.5 border rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none"
-                      value={beta.company}
-                      onChange={(e) => setBeta({ ...beta, company: e.target.value })}
-                    />
-                  </div>
-
-                  {betaError && (
-                    <div className="p-3 bg-red-50 border border-red-100 text-red-600 rounded-lg text-sm">
-                      {betaError}
-                    </div>
-                  )}
-
-                  <button
-                    type="submit"
-                    disabled={betaLoading}
-                    className="w-full py-3.5 bg-secondary text-white font-bold rounded-lg flex items-center justify-center gap-2 disabled:opacity-60 hover:brightness-110 transition-all shadow-lg shadow-secondary/25 text-base"
-                  >
-                    {betaLoading ? (
-                      <Loader2 size={18} className="animate-spin" />
-                    ) : (
-                      <>
-                        Claim Beta Spot <ArrowRight size={18} />
-                      </>
-                    )}
-                  </button>
-
-                  <p className="text-[11px] text-slate-400 text-center">
-                    No credit card required. Beta users get direct product support and help shape the
-                    roadmap.
-                  </p>
-                </motion.form>
-              </motion.div>
-            )}
-          </div>
+                Apply for Beta Access <ArrowRight size={20} />
+              </a>
+            </motion.div>
+            <motion.p variants={fadeUp} className="text-sm text-slate-400 mt-4">
+              No credit card required. Free tier includes 1 drawing &amp; 250 entrants.
+            </motion.p>
+          </motion.div>
         </div>
       </section>
 
