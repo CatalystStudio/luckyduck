@@ -222,10 +222,10 @@ export default function LandingPage() {
           variants={stagger}
           className="text-center mb-14"
         >
-          <motion.h2 variants={fadeUp} className="text-3xl md:text-4xl font-black text-slate-900 mb-4">
+          <motion.h2 variants={fadeUp} className="text-3xl md:text-4xl font-black text-navy mb-4">
             One Platform. Booth to Follow-Up.
           </motion.h2>
-          <motion.p variants={fadeUp} className="text-slate-500 max-w-2xl mx-auto">
+          <motion.p variants={fadeUp} className="text-navy-muted max-w-2xl mx-auto">
             Set up in minutes, capture leads on-site, draw winners, and export clean data — even
             with spotty event Wi-Fi.
           </motion.p>
@@ -241,13 +241,13 @@ export default function LandingPage() {
           {/* Phone mockup card */}
           <motion.div
             variants={fadeUp}
-            className="bg-gradient-to-br from-primary/5 to-accent/5 border border-slate-100 rounded-2xl p-8 flex flex-col items-center justify-center min-h-[400px]"
+            className="bg-gradient-to-br from-sage-light/50 to-cream-dark border border-sage-light/60 rounded-3xl p-8 flex flex-col items-center justify-center min-h-[400px]"
           >
             <MockPhone />
-            <p className="text-sm font-semibold text-slate-700 mt-8">
+            <p className="text-sm font-semibold text-navy mt-8">
               Branded entry form — scan QR, enter to win
             </p>
-            <p className="text-xs text-slate-400 mt-1">
+            <p className="text-xs text-navy-muted mt-1">
               Custom logo, colors, and fields per event
             </p>
           </motion.div>
@@ -255,10 +255,10 @@ export default function LandingPage() {
           {/* Dashboard mockup card */}
           <motion.div
             variants={fadeUp}
-            className="bg-gradient-to-br from-slate-50 to-slate-100/50 border border-slate-100 rounded-2xl p-8 flex flex-col justify-center min-h-[400px]"
+            className="bg-gradient-to-br from-cream-dark to-cream border border-sage-light/40 rounded-3xl p-8 flex flex-col justify-center min-h-[400px]"
           >
             <MockDashboard />
-            <p className="text-sm font-semibold text-slate-700 mt-6 text-center">
+            <p className="text-sm font-semibold text-navy mt-6 text-center">
               Admin dashboard — live stats, winner draw, CSV export
             </p>
           </motion.div>
@@ -289,27 +289,27 @@ export default function LandingPage() {
             <motion.div
               key={i}
               variants={fadeUp}
-              className="bg-white border border-slate-100 rounded-2xl p-6 hover:shadow-lg hover:border-slate-200 transition-all"
+              className="bg-white/80 border border-sage-light/50 rounded-2xl p-6 hover:shadow-lg hover:border-sage-light transition-all"
             >
-              <div className="w-11 h-11 bg-primary/10 text-primary rounded-xl flex items-center justify-center mb-4">
+              <div className="w-11 h-11 bg-sage/10 text-sage rounded-2xl flex items-center justify-center mb-4">
                 {f.icon}
               </div>
-              <h3 className="text-lg font-bold text-slate-900 mb-2">{f.title}</h3>
-              <p className="text-sm text-slate-500 leading-relaxed">{f.desc}</p>
+              <h3 className="text-lg font-bold text-navy mb-2">{f.title}</h3>
+              <p className="text-sm text-navy-muted leading-relaxed">{f.desc}</p>
             </motion.div>
           ))}
         </motion.div>
       </section>
 
       {/* ── How It Works ── */}
-      <section className="bg-white border-y border-slate-100">
+      <section className="bg-white/70 border-y border-sage-light/50">
         <div className="max-w-6xl mx-auto px-6 py-20">
           <motion.h2
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
             variants={fadeUp}
-            className="text-3xl md:text-4xl font-black text-slate-900 text-center mb-16"
+            className="text-3xl md:text-4xl font-black text-navy text-center mb-16"
           >
             Three Steps. Zero Complexity.
           </motion.h2>
@@ -338,11 +338,11 @@ export default function LandingPage() {
               },
             ].map((step, i) => (
               <motion.div key={i} variants={fadeUp} className="text-center">
-                <div className="w-12 h-12 bg-primary text-white rounded-full flex items-center justify-center text-xl font-black mx-auto mb-5">
+                <div className="w-12 h-12 bg-sage text-white rounded-full flex items-center justify-center text-xl font-black mx-auto mb-5">
                   {step.n}
                 </div>
-                <h3 className="text-lg font-bold text-slate-900 mb-2">{step.title}</h3>
-                <p className="text-sm text-slate-500 leading-relaxed max-w-xs mx-auto">{step.desc}</p>
+                <h3 className="text-lg font-bold text-navy mb-2">{step.title}</h3>
+                <p className="text-sm text-navy-muted leading-relaxed max-w-xs mx-auto">{step.desc}</p>
               </motion.div>
             ))}
           </motion.div>
@@ -359,7 +359,7 @@ export default function LandingPage() {
         >
           <motion.h2
             variants={fadeUp}
-            className="text-3xl md:text-4xl font-black text-slate-900 text-center mb-12"
+            className="text-3xl md:text-4xl font-black text-navy text-center mb-12"
           >
             Frequently Asked Questions
           </motion.h2>
@@ -368,20 +368,20 @@ export default function LandingPage() {
               <motion.div
                 key={i}
                 variants={fadeUp}
-                className="bg-white border border-slate-100 rounded-xl overflow-hidden"
+                className="bg-white/80 border border-sage-light/50 rounded-2xl overflow-hidden"
               >
                 <button
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
                   className="w-full px-6 py-4 flex items-center justify-between text-left"
                 >
-                  <span className="font-semibold text-slate-800">{faq.q}</span>
+                  <span className="font-semibold text-navy">{faq.q}</span>
                   <ChevronDown
                     size={18}
-                    className={`text-slate-400 transition-transform shrink-0 ml-4 ${openFaq === i ? 'rotate-180' : ''}`}
+                    className={`text-navy-muted transition-transform shrink-0 ml-4 ${openFaq === i ? 'rotate-180' : ''}`}
                   />
                 </button>
                 {openFaq === i && (
-                  <div className="px-6 pb-4 text-sm text-slate-500 leading-relaxed">
+                  <div className="px-6 pb-4 text-sm text-navy-muted leading-relaxed">
                     {faq.a}
                   </div>
                 )}
@@ -392,8 +392,8 @@ export default function LandingPage() {
       </section>
 
       {/* ── Beta CTA Section ── */}
-      <section id="beta" className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-secondary/10 via-transparent to-transparent" />
+      <section id="beta" className="bg-gradient-to-br from-sage-light via-cream-dark to-cream relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-sage/10 via-transparent to-transparent" />
         <div className="relative max-w-6xl mx-auto px-6 py-24">
           <motion.div
             initial="hidden"
@@ -402,26 +402,26 @@ export default function LandingPage() {
             variants={stagger}
             className="max-w-lg mx-auto text-center"
           >
-            <motion.div variants={fadeUp} className="inline-flex items-center gap-2 bg-secondary/20 backdrop-blur-sm text-secondary text-sm font-semibold px-4 py-1.5 rounded-full mb-6">
+            <motion.div variants={fadeUp} className="inline-flex items-center gap-2 bg-coral/15 text-coral text-sm font-semibold px-4 py-1.5 rounded-full mb-6">
               <Sparkles size={14} />
               Founding Beta — Limited Spots
             </motion.div>
-            <motion.h2 variants={fadeUp} className="text-3xl md:text-4xl font-black text-white mb-4">
+            <motion.h2 variants={fadeUp} className="text-3xl md:text-4xl font-black text-navy mb-4">
               Ready to Ditch the Fishbowl?
             </motion.h2>
-            <motion.p variants={fadeUp} className="text-lg text-slate-300 mb-8 leading-relaxed">
+            <motion.p variants={fadeUp} className="text-lg text-navy-muted mb-8 leading-relaxed">
               Apply for free beta access. We&apos;ll review your application and get you set up
               with a branded giveaway workspace within 24-48 hours.
             </motion.p>
             <motion.div variants={fadeUp} className="flex flex-col sm:flex-row gap-3 justify-center">
               <a
                 href="/apply"
-                className="px-8 py-4 bg-secondary text-white font-bold rounded-xl text-center hover:brightness-110 transition-all shadow-lg shadow-secondary/25 text-lg flex items-center justify-center gap-2"
+                className="px-8 py-4 bg-coral text-white font-bold rounded-2xl text-center hover:brightness-110 transition-all shadow-lg shadow-coral/20 text-lg flex items-center justify-center gap-2"
               >
                 Apply for Beta Access <ArrowRight size={20} />
               </a>
             </motion.div>
-            <motion.p variants={fadeUp} className="text-sm text-slate-400 mt-4">
+            <motion.p variants={fadeUp} className="text-sm text-navy-muted mt-4">
               No credit card required. Free tier includes 1 drawing &amp; 250 entrants.
             </motion.p>
           </motion.div>
@@ -429,32 +429,32 @@ export default function LandingPage() {
       </section>
 
       {/* ── Existing tenant login ── */}
-      <section id="login" className="bg-white border-t border-slate-100">
+      <section id="login" className="bg-white/70 border-t border-sage-light/50">
         <div className="max-w-6xl mx-auto px-6 py-16">
           <div className="max-w-sm mx-auto">
-            <h2 className="text-xl font-bold text-slate-900 mb-1 text-center">
+            <h2 className="text-xl font-bold text-navy mb-1 text-center">
               Already have an account?
             </h2>
-            <p className="text-sm text-slate-500 text-center mb-6">
+            <p className="text-sm text-navy-muted text-center mb-6">
               Enter your organization slug to access your dashboard
             </p>
             <form onSubmit={handleLogin} className="flex gap-2">
               <div className="flex flex-1 items-center gap-0">
-                <span className="px-3 py-2.5 bg-slate-100 border border-r-0 border-slate-200 rounded-l-lg text-sm text-slate-400 select-none">
+                <span className="px-3 py-2.5 bg-sage-light border border-r-0 border-sage-light rounded-l-xl text-sm text-navy-muted select-none">
                   /
                 </span>
                 <input
                   type="text"
                   required
                   placeholder="your-org"
-                  className="flex-1 px-3 py-2.5 border border-slate-200 rounded-r-lg focus:ring-2 focus:ring-primary outline-none text-sm"
+                  className="flex-1 px-3 py-2.5 border border-sage-light rounded-r-xl focus:ring-2 focus:ring-sage outline-none text-sm"
                   value={loginSlug}
                   onChange={(e) => setLoginSlug(e.target.value)}
                 />
               </div>
               <button
                 type="submit"
-                className="px-4 py-2.5 bg-primary text-white font-bold rounded-lg flex items-center gap-1 text-sm hover:brightness-110 transition-all"
+                className="px-4 py-2.5 bg-sage text-white font-bold rounded-xl flex items-center gap-1 text-sm hover:brightness-110 transition-all"
               >
                 Go <ArrowRight size={16} />
               </button>
@@ -464,11 +464,11 @@ export default function LandingPage() {
       </section>
 
       {/* ── Footer ── */}
-      <footer className="border-t border-slate-100 py-8">
+      <footer className="border-t border-sage-light/50 py-8">
         <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <LuckyDuckLogo className="h-5 w-auto" />
-            <span className="text-xs text-slate-400">
+            <span className="text-xs text-navy-muted">
               &copy; 2026 LuckyDuck Marketing, a division of{' '}
               <a
                 href="https://www.catalysts.net"

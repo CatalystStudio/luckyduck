@@ -12,9 +12,9 @@ export default function MockPhone() {
       className="relative mx-auto w-[260px]"
     >
       {/* Phone frame */}
-      <div className="rounded-[2.5rem] border-[3px] border-slate-700 bg-slate-900 p-3 shadow-2xl">
+      <div className="rounded-[2.5rem] border-[3px] border-navy/20 bg-cream-dark p-3 shadow-xl shadow-sage/10">
         {/* Notch */}
-        <div className="mx-auto mb-2 h-5 w-24 rounded-full bg-slate-800" />
+        <div className="mx-auto mb-2 h-5 w-24 rounded-full bg-sage-light" />
         {/* Screen */}
         <div className="rounded-[1.75rem] bg-white overflow-hidden">
           {/* Header with brand */}
@@ -60,13 +60,13 @@ export default function MockPhone() {
       </div>
 
       {/* QR badge */}
-      <div className="absolute -bottom-4 -right-4 w-16 h-16 bg-white rounded-xl shadow-lg border border-slate-100 flex flex-col items-center justify-center">
+      <div className="absolute -bottom-4 -right-4 w-16 h-16 bg-white rounded-2xl shadow-lg border border-sage-light/50 flex flex-col items-center justify-center">
         <div className="grid grid-cols-3 gap-[2px] mb-1">
           {[...Array(9)].map((_, i) => (
-            <div key={i} className={`w-[6px] h-[6px] rounded-[1px] ${i % 3 === 1 ? 'bg-slate-200' : 'bg-slate-700'}`} />
+            <div key={i} className={`w-[6px] h-[6px] rounded-[1px] ${i % 3 === 1 ? 'bg-sage-light' : 'bg-navy'}`} />
           ))}
         </div>
-        <span className="text-[7px] font-bold text-slate-500">SCAN ME</span>
+        <span className="text-[7px] font-bold text-navy-muted">SCAN ME</span>
       </div>
     </motion.div>
   );
