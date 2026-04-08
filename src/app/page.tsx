@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
 import { Trophy, Users, BarChart3, Zap, ArrowRight, Sparkles, Bird, Check, Loader2 } from 'lucide-react';
 
 export default function LandingPage() {
@@ -35,54 +34,30 @@ export default function LandingPage() {
     setBetaLoading(true);
     setBetaError('');
 
-    // Generate slug from company name
-    const slug = beta.company
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-|-$/g, '')
-      .slice(0, 40);
-
-    if (!slug) {
-      setBetaError('Please enter a valid company/organization name.');
-      setBetaLoading(false);
-      return;
-    }
-
     try {
-      // Check if slug already exists
-      const { data: existing } = await supabase
-        .from('tenants')
-        .select('id')
-        .eq('slug', slug)
-        .single();
+      const res = await fetch('/api/beta-signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: beta.name,
+          email: beta.email,
+          company: beta.company,
+          industry: beta.industry,
+          needs: beta.needs || undefined,
+        }),
+      });
 
-      if (existing) {
-        setBetaError(`An account for "${beta.company}" already exists. Try logging in with slug "${slug}" or contact beta@luckyduck.marketing.`);
-        setBetaLoading(false);
+      const data = await res.json();
+
+      if (!res.ok) {
+        setBetaError(data.error || 'Something went wrong. Please try again.');
         return;
       }
 
-      // Create the tenant
-      const { error } = await supabase.from('tenants').insert([{
-        slug,
-        name: beta.company,
-        is_active: true,
-        tier: 'beta',
-        max_drawings: 1,
-        max_entrants_per_drawing: 250,
-        contact_name: beta.name,
-        contact_email: beta.email,
-        contact_company: beta.company,
-        contact_industry: beta.industry,
-        contact_needs: beta.needs || null,
-      }]);
-
-      if (error) throw error;
-
-      setCreatedSlug(slug);
+      setCreatedSlug(data.slug);
       setBetaSuccess(true);
-    } catch (err: any) {
-      setBetaError(err.message || 'Something went wrong. Please try again.');
+    } catch {
+      setBetaError('Something went wrong. Please try again.');
     } finally {
       setBetaLoading(false);
     }

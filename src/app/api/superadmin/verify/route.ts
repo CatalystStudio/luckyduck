@@ -1,13 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createHmac } from 'crypto';
-
-const HMAC_SECRET = process.env.SUPERADMIN_PASSWORD || '';
-
-function generateToken(): string {
-  return createHmac('sha256', HMAC_SECRET)
-    .update('luckyduck-superadmin-session')
-    .digest('hex');
-}
+import { superadminSessions } from '../auth/route';
 
 export async function GET(request: NextRequest) {
   const cookie = request.cookies.get('superadmin_session');
@@ -16,9 +8,11 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ authenticated: false }, { status: 401 });
   }
 
-  const expectedToken = generateToken();
+  const expiresAt = superadminSessions.get(cookie.value);
 
-  if (cookie.value !== expectedToken) {
+  if (expiresAt === undefined || Date.now() > expiresAt) {
+    // Clean up expired session
+    if (expiresAt !== undefined) superadminSessions.delete(cookie.value);
     return NextResponse.json({ authenticated: false }, { status: 401 });
   }
 

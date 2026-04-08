@@ -2,24 +2,24 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
-import { useTenant, useDrawing } from '@/components/DrawingProvider';
 import {
   Trophy, Users, RefreshCw, Check, X, Shield, Download,
   Eye, UserCheck, QrCode as QrCodeIcon, BarChart3,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import QRCode from 'qrcode';
-import type { Entrant } from '@/lib/types';
+import type { Tenant, Drawing, Entrant } from '@/lib/types';
 
 export default function AdminPage() {
   const params = useParams<{ tenantSlug: string; drawingSlug: string }>();
-  const tenant = useTenant();
-  const drawing = useDrawing();
 
   const [pin, setPin] = useState('');
+  const [pinError, setPinError] = useState('');
   const [isAuthorized, setIsAuthorized] = useState(false);
-  const [entrants, setEntrants] = useState<Entrant[]>([]);
+  const [isChecking, setIsChecking] = useState(true);
+
+  const [tenant, setTenant] = useState<Tenant | null>(null);
+  const [drawing, setDrawing] = useState<(Omit<Drawing, 'admin_pin'>) | null>(null);
   const [allEntrants, setAllEntrants] = useState<Entrant[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDrawing, setIsDrawing] = useState(false);
@@ -31,63 +31,75 @@ export default function AdminPage() {
   const qrCanvasRef = useRef<HTMLCanvasElement>(null);
   const [qrReady, setQrReady] = useState(false);
 
-  // Stats
-  const [viewCount, setViewCount] = useState(drawing.view_count || 0);
+  // Derived data
+  const entrants = allEntrants.filter((e) => !e.is_winner && !e.disqualified);
+  const viewCount = drawing?.view_count || 0;
   const totalEntries = allEntrants.length;
   const winnerCount = allEntrants.filter((e) => e.is_winner).length;
 
+  // Check existing session on mount
+  useEffect(() => {
+    async function checkSession() {
+      try {
+        const res = await fetch('/api/admin/verify');
+        if (res.ok) {
+          const data = await res.json();
+          if (
+            data.authorized &&
+            data.tenantSlug === params.tenantSlug &&
+            data.drawingSlug === params.drawingSlug
+          ) {
+            setIsAuthorized(true);
+          }
+        }
+      } catch {
+        // Not authorized
+      } finally {
+        setIsChecking(false);
+      }
+    }
+    checkSession();
+  }, [params.tenantSlug, params.drawingSlug]);
+
+  // Fetch admin data when authorized
   useEffect(() => {
     if (isAuthorized) {
-      fetchEntrants();
-      fetchAllEntrants();
-      fetchViewCount();
-      generateQR();
+      fetchAdminData();
     }
   }, [isAuthorized]);
 
-  const fetchEntrants = async () => {
+  // Generate QR when drawing data is loaded
+  useEffect(() => {
+    if (drawing) {
+      generateQR();
+    }
+  }, [drawing]);
+
+  const fetchAdminData = async () => {
     setLoading(true);
-    const { data } = await supabase
-      .from('entrants')
-      .select('*')
-      .eq('drawing_id', drawing.id)
-      .eq('is_winner', false)
-      .eq('disqualified', false);
-    setEntrants((data as Entrant[]) || []);
-    setLoading(false);
+    try {
+      const res = await fetch('/api/admin/data');
+      if (!res.ok) {
+        setIsAuthorized(false);
+        return;
+      }
+      const data = await res.json();
+      setTenant(data.tenant);
+      setDrawing(data.drawing);
+      setAllEntrants(data.entrants || []);
+    } catch {
+      // Failed to fetch
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const fetchAllEntrants = async () => {
-    const { data } = await supabase
-      .from('entrants')
-      .select('*')
-      .eq('drawing_id', drawing.id)
-      .order('created_at', { ascending: false });
-    setAllEntrants((data as Entrant[]) || []);
-  };
-
-  const fetchViewCount = async () => {
-    const { data } = await supabase
-      .from('drawings')
-      .select('view_count')
-      .eq('id', drawing.id)
-      .single();
-    if (data) setViewCount(data.view_count || 0);
-  };
-
-  const refreshAll = () => {
-    fetchEntrants();
-    fetchAllEntrants();
-    fetchViewCount();
-  };
-
-  const drawingUrl = typeof window !== 'undefined'
+  const drawingUrl = typeof window !== 'undefined' && drawing
     ? `${window.location.origin}/${params.tenantSlug}/${params.drawingSlug}?utm_campaign=${encodeURIComponent(drawing.name)}`
     : '';
 
   const generateQR = async () => {
-    if (!qrCanvasRef.current) {
-      // Retry after render
+    if (!qrCanvasRef.current || !drawing) {
       setTimeout(generateQR, 100);
       return;
     }
@@ -105,6 +117,7 @@ export default function AdminPage() {
   };
 
   const downloadQR = async () => {
+    if (!drawing) return;
     try {
       const url = `${window.location.origin}/${params.tenantSlug}/${params.drawingSlug}?utm_campaign=${encodeURIComponent(drawing.name)}`;
       const dataUrl = await QRCode.toDataURL(url, {
@@ -121,12 +134,30 @@ export default function AdminPage() {
     }
   };
 
-  const handlePinSubmit = (e: React.FormEvent) => {
+  const handlePinSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (pin === drawing.admin_pin) {
-      setIsAuthorized(true);
-    } else {
-      alert('Incorrect PIN');
+    setPinError('');
+
+    try {
+      const res = await fetch('/api/admin/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tenantSlug: params.tenantSlug,
+          drawingSlug: params.drawingSlug,
+          pin,
+        }),
+      });
+
+      if (res.ok) {
+        setIsAuthorized(true);
+      } else {
+        const data = await res.json();
+        setPinError(data.error || 'Incorrect PIN');
+        setPin('');
+      }
+    } catch {
+      setPinError('Network error. Please try again.');
       setPin('');
     }
   };
@@ -153,36 +184,38 @@ export default function AdminPage() {
 
   const confirmWinner = async () => {
     if (!selectedWinner) return;
-    const { error } = await supabase
-      .from('entrants')
-      .update({ is_winner: true })
-      .eq('id', selectedWinner.id);
 
-    if (error) alert(error.message);
-    else {
-      alert('Winner confirmed!');
-      setSelectedWinner(null);
-      refreshAll();
+    try {
+      const res = await fetch('/api/admin/data', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'confirm_winner', entrantId: selectedWinner.id }),
+      });
+
+      if (res.ok) {
+        alert('Winner confirmed!');
+        setSelectedWinner(null);
+        fetchAdminData();
+      } else {
+        const data = await res.json();
+        alert(data.error || 'Failed to confirm winner');
+      }
+    } catch {
+      alert('Network error');
     }
   };
 
-  const exportCSV = async () => {
-    const { data, error } = await supabase
-      .from('entrants')
-      .select('*')
-      .eq('drawing_id', drawing.id)
-      .order('created_at', { ascending: true });
-
-    if (error || !data || data.length === 0) {
-      alert(error?.message || 'No entries to export.');
+  const exportCSV = () => {
+    if (!drawing || allEntrants.length === 0) {
+      alert('No entries to export.');
       return;
     }
 
     const fieldNames = drawing.form_fields.map((f) => f.name);
     const headers = [...fieldNames, 'created_at', 'is_winner', 'disqualified'];
-    const rows = data.map((entry: any) =>
+    const rows = allEntrants.map((entry) =>
       headers.map((h) => {
-        const val = entry[h];
+        const val = (entry as unknown as Record<string, unknown>)[h];
         if (val === null || val === undefined) return '';
         const str = String(val);
         return str.includes(',') || str.includes('"') || str.includes('\n')
@@ -201,6 +234,15 @@ export default function AdminPage() {
     URL.revokeObjectURL(url);
   };
 
+  // ── Loading state ──────────────────────────────────────────
+  if (isChecking) {
+    return (
+      <main className="min-h-screen flex items-center justify-center bg-slate-900">
+        <div className="text-white text-sm">Checking session...</div>
+      </main>
+    );
+  }
+
   // ── PIN Gate ──────────────────────────────────────────────────
   if (!isAuthorized) {
     return (
@@ -212,7 +254,7 @@ export default function AdminPage() {
             </div>
           </div>
           <h1 className="text-xl font-bold text-center mb-2">Admin Access</h1>
-          <p className="text-sm text-slate-500 text-center mb-6">{drawing.name}</p>
+          <p className="text-sm text-slate-500 text-center mb-6">{params.drawingSlug}</p>
           <form onSubmit={handlePinSubmit} className="space-y-4">
             <input
               type="password"
@@ -222,11 +264,24 @@ export default function AdminPage() {
               onChange={(e) => setPin(e.target.value)}
               autoFocus
             />
+            {pinError && (
+              <div className="p-2 bg-red-50 border border-red-100 text-red-600 rounded-lg text-sm text-center">
+                {pinError}
+              </div>
+            )}
             <button className="w-full py-3 bg-primary text-white font-bold rounded-lg">
               Unlock
             </button>
           </form>
         </div>
+      </main>
+    );
+  }
+
+  if (loading || !drawing || !tenant) {
+    return (
+      <main className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="text-slate-500 text-sm">Loading admin data...</div>
       </main>
     );
   }
@@ -249,7 +304,7 @@ export default function AdminPage() {
               <Download size={16} /> Export CSV
             </button>
             <button
-              onClick={refreshAll}
+              onClick={fetchAdminData}
               className="p-2 bg-white border border-slate-200 rounded-lg hover:bg-slate-50"
               title="Refresh data"
             >
@@ -333,7 +388,7 @@ export default function AdminPage() {
                           <tr key={e.id} className="border-b border-slate-50">
                             {drawing.form_fields.map((f) => (
                               <td key={f.name} className="py-2 pr-4 text-slate-700 truncate max-w-[150px]">
-                                {(e as any)[f.name] || '—'}
+                                {(e as unknown as Record<string, unknown>)[f.name] as string || '\u2014'}
                               </td>
                             ))}
                             <td className="py-2">

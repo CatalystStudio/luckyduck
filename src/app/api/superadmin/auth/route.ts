@@ -1,16 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createHmac } from 'crypto';
+import crypto from 'crypto';
+import { rateLimit } from '@/lib/rateLimit';
 
 const SUPERADMIN_PASSWORD = process.env.SUPERADMIN_PASSWORD || '';
-const HMAC_SECRET = process.env.SUPERADMIN_PASSWORD || '';
 
-function generateToken(): string {
-  return createHmac('sha256', HMAC_SECRET)
-    .update('luckyduck-superadmin-session')
-    .digest('hex');
-}
+// In-memory session store: token -> expiresAt
+const sessions = new Map<string, number>();
+
+export { sessions as superadminSessions };
 
 export async function POST(request: NextRequest) {
+  const ip = request.headers.get('x-forwarded-for') ?? 'unknown';
+
+  if (!rateLimit(`superadmin:${ip}`, 5, 15 * 60 * 1000)) {
+    return NextResponse.json(
+      { error: 'Too many attempts. Try again later.' },
+      { status: 429 }
+    );
+  }
+
   if (!SUPERADMIN_PASSWORD) {
     return NextResponse.json(
       { error: 'SUPERADMIN_PASSWORD not configured on server.' },
@@ -25,15 +33,19 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid password' }, { status: 401 });
   }
 
-  const token = generateToken();
+  // Generate a random session token — NOT deterministic
+  const sessionToken = crypto.randomBytes(32).toString('hex');
+  const expiresAt = Date.now() + 8 * 60 * 60 * 1000; // 8 hours
+  sessions.set(sessionToken, expiresAt);
+
   const response = NextResponse.json({ ok: true });
 
-  response.cookies.set('superadmin_session', token, {
+  response.cookies.set('superadmin_session', sessionToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    sameSite: 'strict',
     path: '/',
-    maxAge: 60 * 60 * 8, // 8 hours
+    maxAge: 60 * 60 * 8,
   });
 
   return response;

@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+const rawUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const rawKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabaseUrl = (rawUrl && rawUrl !== 'undefined') ? rawUrl.trim() : 'https://placeholder.supabase.co';
+const supabaseKey = (rawKey && rawKey !== 'undefined') ? rawKey.trim() : 'placeholder';
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 export async function POST(request: NextRequest) {
@@ -13,25 +15,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'drawing_id required' }, { status: 400 });
     }
 
-    // Try Supabase RPC first (atomic increment)
     const { error: rpcError } = await supabase.rpc('increment_view_count', {
       did: drawing_id,
     });
 
     if (rpcError) {
-      // Fallback: read + increment (non-atomic but works without RPC)
-      const { data } = await supabase
-        .from('drawings')
-        .select('view_count')
-        .eq('id', drawing_id)
-        .single();
-
-      if (data) {
-        await supabase
-          .from('drawings')
-          .update({ view_count: (data.view_count || 0) + 1 })
-          .eq('id', drawing_id);
-      }
+      console.error('increment_view_count RPC failed:', rpcError.message);
+      // Do NOT fall back to non-atomic read-then-update
     }
 
     return NextResponse.json({ ok: true });
