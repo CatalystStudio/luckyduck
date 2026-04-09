@@ -4,7 +4,7 @@ import { supabaseServer } from '@/lib/supabaseServer';
 
 function getStripe() {
   return new Stripe(process.env.STRIPE_SECRET_KEY!, {
-    apiVersion: '2025-04-30.basil',
+    apiVersion: '2026-03-25.dahlia',
   });
 }
 
